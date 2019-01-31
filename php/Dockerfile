@@ -1,6 +1,6 @@
 # PHP 7.2.14
 # Reference of docker image: https://github.com/docker-library/docs/blob/master/php/README.md
-# Version 0.1
+# Version 0.1.0
 
 FROM php:7.2.14-cli-stretch
 
@@ -22,9 +22,10 @@ RUN apt-get update && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        libzip-dev \
     && docker-php-ext-install -j$(nproc) iconv \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --\
+    && docker-php-ext-install -j$(nproc) gd zip pdo_mysql
 
 # Install xdebug by pecl
 RUN pecl install xdebug \
@@ -36,8 +37,11 @@ COPY php.ini "$PHP_INI_DIR/php.ini"
 # Publishing the 9001 port to contect to Xdebug port.
 EXPOSE 9001
 
+# Download PHP Composer
+RUN cd /applications && curl -sS https://getcomposer.org/installer | php
+
 # '-v {local path:volumn path}' to bind mount on container
-VOLUME ['/applications/entry']
+VOLUME ["/applications/entry"]
 
 # Checking whether the  mount is binded correctly
 #ENTRYPOINT ["ls", "/applications/entry"]
