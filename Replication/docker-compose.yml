@@ -1,0 +1,44 @@
+version: "3"
+services:
+    master:
+        build: ../redis
+        image: redis-docker-dev:1.0
+        networks:
+            - redis-cluster-dev
+        environment:
+            ROLE: master
+        ports:
+            - "6379:6379"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/replication/master:/datas"
+        command: redis-server /applications/master.redis.conf
+    slave_1:
+        build: ../redis
+        image: redis-docker-dev:1.0
+        networks:
+            - redis-cluster-dev
+        environment:
+            ROLE: slave
+        depends_on:
+            - master
+        ports:
+            - "6381:6380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/replication/slave-2:/datas"
+        command: redis-server /applications/slave.redis.conf --slaveof master 6379
+    slave_2:
+        build: ../redis
+        image: redis-docker-dev:1.0
+        networks:
+            - redis-cluster-dev
+        environment:
+            ROLE: slave
+        depends_on:
+            - master
+        ports:
+            - "6382:6380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/replication/slave-2:/datas"
+        command: redis-server /applications/slave.redis.conf --slaveof master 6379
+networks:
+    redis-cluster-dev:
