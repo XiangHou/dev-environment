@@ -1,0 +1,164 @@
+version: "3"
+services:
+    master1:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: master
+            CONFIG_NAME: master.redis.cluster.conf
+        ports:
+            - "7010:6379"
+            - "17010:16379"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/master-1:/datas"
+    slave_1_1:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - master1
+        ports:
+            - "7011:6380"
+            - "17011:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-1-1:/datas"
+    slave_1_2:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - slave_1_1
+        ports:
+            - "7012:6380"
+            - "17012:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-1-2:/datas"
+    master2:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: master
+            CONFIG_NAME: master.redis.cluster.conf
+        depends_on:
+            - slave_1_2
+        ports:
+            - "7020:6379"
+            - "17020:16379"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/master-2:/datas"
+    slave_2_1:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - master2
+        ports:
+            - "7021:6380"
+            - "17021:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-2-1:/datas"
+    slave_2_2:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - slave_2_1
+        ports:
+            - "7022:6380"
+            - "17022:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-2-2:/datas"
+    master3:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: master
+            CONFIG_NAME: master.redis.cluster.conf
+        depends_on:
+            - slave_2_2
+        ports:
+            - "7030:6379"
+            - "17030:16379"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/master-3:/datas"
+    slave_3_1:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - master3
+        ports:
+            - "7031:6380"
+            - "17031:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-3-1:/datas"
+    slave_3_2:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        environment:
+            ROLE: slave
+            CONFIG_NAME: slave.redis.cluster.conf
+        depends_on:
+            - slave_3_1
+        ports:
+            - "7032:6380"
+            - "17032:16380"
+        volumes:
+            - "/Users/xiang.hou/Middleware/Services/datas/redis/cluster/slave-2-2:/datas"
+    cluster_create:
+        build: ../redis
+        image: redis-docker-dev:1.1
+        networks:
+            - redis-cluster-dev-node
+        depends_on:
+            - slave_3_2
+        links:
+            - master1
+            - slave_1_1
+            - slave_1_2
+            - master2
+            - slave_2_1
+            - slave_2_2
+            - master3
+            - slave_3_1
+            - slave_3_2
+        # The command to create Redis Cluster
+        command:
+            - /bin/sh
+            - -c
+            # - |
+            #    echo yes | /usr/local/bin/redis-cli --cluster create master1:6379 slave_1_1:6380 slave_1_2:6380 master2:6379 slave_2_1:6380 slave_2_2:6380 master3:6379 slave_3_1:6380 slave_3_2:6380 --cluster-replicas 2 -a 111111
+            - |
+                echo yes | /usr/local/bin/redis-cli --cluster create 172.24.0.2:6379 172.24.0.3:6380 172.24.0.4:6380 172.24.0.5:6379 172.24.0.6:6380 172.24.0.7:6380 172.24.0.8:6379 172.24.0.9:6380 172.24.0.10:6380 --cluster-replicas 2 -a 111111
+
+
+networks:
+    redis-cluster-dev-node:
