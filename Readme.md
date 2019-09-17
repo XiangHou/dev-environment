@@ -40,6 +40,8 @@
 ## How to connect to Redis server.
   - redis-cli Client:
     - command: `redis-cli -h {host} -p {port} -a {password}`
+  - redis-cli Client(Enable Cluster Mode):
+    - command: `redis-cli -c -h {host} -p {port} -a {password}`
 
 ## Information
   - Replication
